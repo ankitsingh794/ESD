@@ -24,6 +24,12 @@
   transform: scale(1.05);
 }
 
+/* 👇 Fix the robot icon sizing inside the button */
+.floating-button svg {
+  width: 30px;
+  height: 30px;
+}
+
 /* Modal overlay */
 .modal-overlay {
   position: fixed;
@@ -48,6 +54,7 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
   position: relative;
   animation: slideIn 0.3s ease;
+  font-family: "Segoe UI", sans-serif;
 }
 
 @keyframes slideIn {
@@ -88,10 +95,10 @@
   color: #ff4d4f;
 }
 
-/* Chatbox input and response */
+/* Chatbox input */
 .chatbox textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   resize: vertical;
   min-height: 80px;
   border-radius: 6px;
@@ -101,6 +108,7 @@
   margin-bottom: 10px;
 }
 
+/* Chatbox submit button */
 .chatbox button {
   width: 100%;
   padding: 10px;
@@ -118,6 +126,12 @@
   background-color: #3c7ecb;
 }
 
+.chatbox button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Chat response */
 .response {
   white-space: pre-wrap;
   background-color: #f4f4f4;
@@ -128,11 +142,22 @@
   max-height: 250px;
   overflow-y: auto;
   border: 1px solid #ddd;
+  margin-top: 10px;
 }
 
-/* 👇 Fix the robot icon sizing inside the button */
-.robot-icon {
-  width: 28px;
-  height: 28px;
-  display: block;
+/* Download button */
+.download-button {
+  margin-top: 10px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+  background-color: #219150;
 }
