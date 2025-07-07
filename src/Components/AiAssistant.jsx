@@ -31,12 +31,15 @@ export default function AiAssistant() {
   };
 
   const downloadTxtFile = (text) => {
-    const blob = new Blob([text], { type: "text/plain" });
+    const timestamp = new Date().toLocaleString();
+    const header = `EmpowerHub AI Assistant Response\nGenerated at: ${timestamp}\n\n`;
+    const blob = new Blob([header + text], { type: "text/plain" });
     const link = document.createElement("a");
     link.download = "empowerhub-ai-response.txt";
     link.href = URL.createObjectURL(blob);
     link.click();
   };
+
 
   return (
     <div className="chatbox">
