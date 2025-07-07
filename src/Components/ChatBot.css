@@ -1,0 +1,138 @@
+/* Floating circular AI button */
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  font-size: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-button:hover {
+  background-color: #3c7ecb;
+  transform: scale(1.05);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Modal content */
+.modal-content {
+  width: 90%;
+  max-width: 500px;
+  background-color: #ffffff;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.close-button {
+  font-size: 22px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.close-button:hover {
+  color: #ff4d4f;
+}
+
+/* Chatbox input and response */
+.chatbox textarea {
+  width: 100%;
+  padding: 10px;
+  resize: vertical;
+  min-height: 80px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.chatbox button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.chatbox button:hover {
+  background-color: #3c7ecb;
+}
+
+.response {
+  white-space: pre-wrap;
+  background-color: #f4f4f4;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+}
+
+/* 👇 Fix the robot icon sizing inside the button */
+.robot-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
