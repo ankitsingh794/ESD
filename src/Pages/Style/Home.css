@@ -37,18 +37,23 @@
 
 .yt-videos {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-  padding: 2rem;
+  padding: 1rem;
+  justify-items: center;
 }
 
 .home-content-2 {
   align-items: flex-start;
   width: 100%;
   margin-left: clamp(11rem, 2vw, 2rem);
-
-
 }
+
+.home-content-3 {
+  align-items: flex-start;
+  width: 100%;
+}
+
 
 @media (min-width: 768px) {
   .yt-videos {
