@@ -1,5 +1,5 @@
 import React from "react";
-import LazyYouTube from "../Components/LazyYoutube";
+import LazyYouTube from "../Components/LazyYouTube";
 import SplitText from "../Components/SplitText";
 import StarBorder from "../Components/StarBorder";
 import Navbar from "../Components/Navbar";
