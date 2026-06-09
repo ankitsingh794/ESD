@@ -39,6 +39,7 @@ export default function Navbar() {
         >
           <Link to={"/explore"} className="nav-link">Explore</Link>
           <Link to={"/community"} className="nav-link">Community</Link>
+          <Link to={"/roadmap"} className="nav-link">AI Roadmap</Link>
           <Link to={"/login"} className="nav-cta">Join Us</Link>
         </div>
       </div>

@@ -4,14 +4,16 @@ import AiAssistantWidget from './Components/ChatBot.jsx';
 
 // Importing Pages
 import Home from './Pages/Home.jsx';
+import RoadmapPage from './Pages/RoadmapPage.jsx';
 import Error404 from './Components/Error404.jsx';
 
 function App() {
   return (
     <>
-    <AiAssistantWidget/>
+      <AiAssistantWidget />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path='*' element={<Error404 />} />
       </Routes>
     </>
