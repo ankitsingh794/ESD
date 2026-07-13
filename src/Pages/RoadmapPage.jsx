@@ -21,7 +21,41 @@ const CAREER_FIELDS = [
 
 const SKILL_LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
-// ── Robust parser that handles markdown bold headings, numbered headings, etc.
+// ── Quick-pick presets ──
+const SKILL_PRESETS = [
+  "HTML, CSS, JavaScript",
+  "Python, NumPy, Pandas",
+  "React, Node.js",
+  "Java, Spring Boot",
+  "SQL, Excel",
+  "Figma, Adobe XD",
+  "C++, DSA",
+  "Docker, Kubernetes",
+];
+
+const INTEREST_PRESETS = [
+  "Building websites & apps",
+  "Data analysis & visualization",
+  "Designing user interfaces",
+  "Machine learning & AI",
+  "Cloud infrastructure",
+  "Mobile app development",
+  "Cybersecurity & ethical hacking",
+  "Digital marketing & SEO",
+];
+
+const GOAL_PRESETS = [
+  "Get my first tech job",
+  "Switch careers into tech",
+  "Become a full-stack developer",
+  "Land a data scientist role",
+  "Freelance as a designer",
+  "Build my own startup",
+  "Crack FAANG interviews",
+  "Upskill in 3 months",
+];
+
+// ── Robust parser ──
 function parseRoadmap(raw) {
   const sections = {
     careerPaths: [],
@@ -36,18 +70,17 @@ function parseRoadmap(raw) {
   let currentSection = null;
   let foundAnySection = false;
 
-  // Strip markdown bold/italic: **text** or *text*
-  const strip = (s) => s.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#+\s*/g, "").trim();
+  const strip = (s) =>
+    s.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#+\s*/g, "").trim();
 
   for (const line of lines) {
     const clean = strip(line);
     const lower = clean.toLowerCase();
 
-    // Detect section headings (handles: "## 1. Career Paths", "**Career Paths**", "1. Career Paths", etc.)
     const isHeading =
       line.startsWith("#") ||
       (line.startsWith("**") && line.endsWith("**")) ||
-      /^\d+[\.\)]\s/.test(line);
+      /^\d+[.)]\s/.test(line);
 
     if (isHeading || lower.endsWith(":")) {
       if (
@@ -88,20 +121,18 @@ function parseRoadmap(raw) {
       continue;
     }
 
-    // Collect bullet points into current section
     if (
       currentSection &&
       (line.startsWith("-") ||
         line.startsWith("•") ||
         line.startsWith("*") ||
-        line.match(/^\d+[\.\)]/))
+        line.match(/^\d+[.)]/) )
     ) {
-      const item = clean.replace(/^[-•\d\.\)]\s*/, "").trim();
+      const item = clean.replace(/^[-•\d.)]\s*/, "").trim();
       if (item && sections[currentSection]) {
         sections[currentSection].push(item);
       }
     } else if (!foundAnySection && !line.startsWith("#")) {
-      // Collect intro text as summary
       sections.summary += clean + " ";
     }
   }
@@ -109,17 +140,17 @@ function parseRoadmap(raw) {
   return sections;
 }
 
-// ── Fallback: split raw text into 5 even chunks for tabs if parser finds nothing
 function fallbackParse(raw, sections) {
   const hasAny = Object.values(sections).some(
     (v) => Array.isArray(v) && v.length > 0
   );
   if (hasAny) return sections;
 
-  // Just dump all lines as learning roadmap items so something always shows
   const lines = raw
     .split("\n")
-    .map((l) => l.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#+\s*/g, "").trim())
+    .map((l) =>
+      l.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#+\s*/g, "").trim()
+    )
     .filter((l) => l.length > 3);
 
   return {
@@ -127,6 +158,44 @@ function fallbackParse(raw, sections) {
     learningRoadmap: lines,
     summary: "Here is your AI-generated career roadmap:",
   };
+}
+
+// ── Chip component ──
+function ChipPicker({ options, value, onPick, multi = false }) {
+  const active = multi
+    ? options.filter((o) => value.includes(o))
+    : [value];
+
+  const toggle = (opt) => {
+    if (!multi) {
+      onPick(value === opt ? "" : opt);
+    } else {
+      const parts = value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (parts.includes(opt)) {
+        onPick(parts.filter((p) => p !== opt).join(", "));
+      } else {
+        onPick([...parts, opt].join(", "));
+      }
+    }
+  };
+
+  return (
+    <div className="chip-row">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          className={`chip ${value.includes(opt) ? "chip-active" : ""}`}
+          onClick={() => toggle(opt)}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 export default function RoadmapPage() {
@@ -222,11 +291,11 @@ Be specific, practical, and encouraging. 4-6 bullets per section.`;
       setRoadmap(fallbackParse(text, parsed));
     } catch (err) {
       console.error("API Error:", err?.response?.data || err.message);
+      const status = err?.response?.status;
       const errMsg =
-        err?.response?.data?.error?.message ||
-        err?.response?.status === 401
+        status === 401
           ? "❌ Invalid API key. Please check your OpenRouter key."
-          : err?.response?.status === 429
+          : status === 429
           ? "⏳ Rate limit hit. Wait a moment and try again."
           : "❌ Failed to generate roadmap. Check console for details.";
       setError(errMsg);
@@ -246,12 +315,23 @@ Be specific, practical, and encouraging. 4-6 bullets per section.`;
     link.click();
   };
 
+  const handleReset = () => {
+    setSkills("");
+    setInterests("");
+    setGoal("");
+    setLevel("Beginner");
+    setSelectedField("");
+    setRoadmap(null);
+    setRawResponse("");
+    setError("");
+  };
+
   const tabs = [
-    { id: "roadmap", label: "📍 Learning Path", key: "learningRoadmap" },
-    { id: "careers", label: "🎯 Career Paths", key: "careerPaths" },
-    { id: "projects", label: "🛠 Projects", key: "suggestedProjects" },
-    { id: "courses", label: "📚 Courses", key: "recommendedCourses" },
-    { id: "jobs", label: "💼 Job Roles", key: "jobRoles" },
+    { id: "roadmap",  label: "📍 Learning Path", key: "learningRoadmap" },
+    { id: "careers",  label: "🎯 Career Paths",  key: "careerPaths" },
+    { id: "projects", label: "🛠 Projects",       key: "suggestedProjects" },
+    { id: "courses",  label: "📚 Courses",        key: "recommendedCourses" },
+    { id: "jobs",     label: "💼 Job Roles",      key: "jobRoles" },
   ];
 
   return (
@@ -268,44 +348,70 @@ Be specific, practical, and encouraging. 4-6 bullets per section.`;
 
       <div className="roadmap-layout">
         {/* ── INPUT PANEL ── */}
-        <div className="input-panel">
-          <div className="panel-header">
+        <div className="rmp-input-panel">
+          <div className="rmp-panel-header">
             <span className="panel-icon">👤</span>
             <h2>Your Profile</h2>
+            {(skills || interests || goal) && (
+              <button className="reset-btn" onClick={handleReset} title="Clear all">
+                ↺ Reset
+              </button>
+            )}
           </div>
 
+          {/* Skills */}
           <div className="form-group">
             <label>Current Skills</label>
+            <ChipPicker
+              options={SKILL_PRESETS}
+              value={skills}
+              onPick={setSkills}
+              multi
+            />
             <textarea
-              rows="3"
-              placeholder="e.g. HTML, CSS, Python basics, Excel..."
+              rows="2"
+              placeholder="Or type your own: e.g. HTML, CSS, Python..."
               value={skills}
               onChange={(e) => setSkills(e.target.value)}
             />
           </div>
 
+          {/* Interests */}
           <div className="form-group">
             <label>Interests</label>
+            <ChipPicker
+              options={INTEREST_PRESETS}
+              value={interests}
+              onPick={setInterests}
+              multi
+            />
             <textarea
               rows="2"
-              placeholder="e.g. Building websites, working with data, design..."
+              placeholder="Or type your own: e.g. Building websites, design..."
               value={interests}
               onChange={(e) => setInterests(e.target.value)}
             />
           </div>
 
+          {/* Goal */}
           <div className="form-group">
             <label>
               Career Goal <span className="optional">(optional)</span>
             </label>
+            <ChipPicker
+              options={GOAL_PRESETS}
+              value={goal}
+              onPick={setGoal}
+            />
             <input
               type="text"
-              placeholder="e.g. Become a full-stack developer in 6 months"
+              placeholder="Or type your goal..."
               value={goal}
               onChange={(e) => setGoal(e.target.value)}
             />
           </div>
 
+          {/* Level + Field row */}
           <div className="form-row">
             <div className="form-group">
               <label>Skill Level</label>
@@ -422,7 +528,6 @@ Be specific, practical, and encouraging. 4-6 bullets per section.`;
                 )}
               </div>
 
-              {/* Always-visible raw response */}
               <details className="raw-toggle" open={roadmap.learningRoadmap?.length === 0}>
                 <summary>📄 View Full AI Response</summary>
                 <pre className="raw-response">{rawResponse}</pre>

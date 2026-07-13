@@ -89,7 +89,7 @@
 }
 
 /* ── INPUT PANEL ── */
-.input-panel {
+.rmp-input-panel {
   background: #ffffff;
   border: 1.5px solid rgba(15, 23, 42, 0.08);
   border-radius: 20px;
@@ -98,9 +98,10 @@
   height: fit-content;
   position: sticky;
   top: 84px;
+  z-index: 10;
 }
 
-.panel-header {
+.rmp-panel-header {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -111,16 +112,79 @@
 
 .panel-icon { font-size: 1.5rem; }
 
-.panel-header h2 {
+.rmp-panel-header h2 {
   font-family: 'Inter', sans-serif;
   font-size: 1.1rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
+  flex: 1;
+}
+
+/* ── RESET BUTTON ── */
+.reset-btn {
+  margin-left: auto;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  font-family: inherit;
+}
+.reset-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+/* ── CHIP QUICK-PICKS ── */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.chip {
+  padding: 4px 11px;
+  border-radius: 9999px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.chip:hover {
+  border-color: #a5b4fc;
+  color: #4338ca;
+  background: #eef2ff;
+}
+
+.chip-active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.28);
+}
+
+.chip-active:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  border-color: transparent;
 }
 
 /* ── FORM ELEMENTS ── */
-.form-group { margin-bottom: 18px; }
+.form-group { margin-bottom: 16px; }
 
 .form-group label {
   display: block;
