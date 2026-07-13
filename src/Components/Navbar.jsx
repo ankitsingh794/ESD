@@ -20,9 +20,9 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <div className="navbar-logo">
+        <Link to="/" className="navbar-logo">
           <img src={logo} alt="EmpowerHub Logo" className="logo-image" />
-        </div>
+        </Link>
 
         <button
           className={`hamburger ${menuOpen ? "open" : ""}`}
@@ -37,6 +37,7 @@ export default function Navbar() {
           ref={menuRef}
           className={`navbar-links ${menuOpen ? "active" : ""}`}
         >
+          <Link to={"/"} className="nav-link">Home</Link>
           <Link to={"/explore"} className="nav-link">Explore</Link>
           <Link to={"/community"} className="nav-link">Community</Link>
           <Link to={"/roadmap"} className="nav-link">AI Roadmap</Link>
