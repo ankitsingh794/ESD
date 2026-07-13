@@ -1,4 +1,4 @@
-// components/AiAssistantWidget.jsx
+// components/ChatBot.jsx
 import { useState } from "react";
 import AiAssistant from "./AiAssistant";
 import "./ChatBot.css";
@@ -9,21 +9,41 @@ export default function AiAssistantWidget() {
 
   return (
     <>
-      {/* Floating button */}
-    <button className="floating-button" onClick={() => setIsOpen(true)}>
-  <RiRobot3Fill className="robot-icon" />
-</button>
+      {/* Floating Action Button */}
+      <button
+        className="floating-button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        aria-label="Open AI Assistant"
+      >
+        <RiRobot3Fill />
+      </button>
 
-      {/* Modal */}
+      {/* Floating Chat Panel */}
       {isOpen && (
-        <div className="modal-overlay" onClick={() => setIsOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>EmpowerHub AI Assistant</h3>
-              <button className="close-button" onClick={() => setIsOpen(false)}>×</button>
+        <div className="chat-panel">
+          {/* Header */}
+          <div className="panel-header">
+            <div className="panel-header-avatar">
+              <RiRobot3Fill size={18} />
             </div>
-            <AiAssistant />
+            <div className="panel-header-info">
+              <h3>EmpowerHub AI</h3>
+              <span>
+                <span className="online-dot" />
+                Online · Career Assistant
+              </span>
+            </div>
+            <button
+              className="panel-close-btn"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close"
+            >
+              ×
+            </button>
           </div>
+
+          {/* Assistant body (messages + input) */}
+          <AiAssistant />
         </div>
       )}
     </>

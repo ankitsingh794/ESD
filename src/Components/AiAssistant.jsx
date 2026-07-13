@@ -1,50 +1,104 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { IoSend } from "react-icons/io5";
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 
-// Simple markdown renderer: bold, bullets
+// ── Inline renderer: converts **bold**, *italic*, `code` → React elements ──
+function renderInline(text) {
+  // Split on bold, italic, or inline code patterns
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
+  return parts.map((part, j) => {
+    if (part.startsWith("**") && part.endsWith("**"))
+      return <strong key={j}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*"))
+      return <em key={j}>{part.slice(1, -1)}</em>;
+    if (part.startsWith("`") && part.endsWith("`"))
+      return (
+        <code key={j} style={{
+          background: "rgba(99,102,241,0.1)", borderRadius: "4px",
+          padding: "1px 5px", fontSize: "0.80rem", fontFamily: "monospace",
+          color: "#4f46e5"
+        }}>{part.slice(1, -1)}</code>
+      );
+    return part;
+  });
+}
+
+// ── Block renderer: headings, bullets, numbered, blockquote, paragraph ──
 function renderMarkdown(text) {
   if (!text) return null;
   const lines = text.split("\n");
   return lines.map((line, i) => {
     const trimmed = line.trim();
-    // Bold headings: **text**
-    if (trimmed.startsWith("**") && trimmed.endsWith("**") && trimmed.length > 4) {
-      const content = trimmed.slice(2, -2);
+
+    // ### Heading 3
+    if (/^###\s+/.test(trimmed)) {
       return (
-        <p key={i} style={{ fontWeight: "700", color: "#1e3a5f", margin: "12px 0 4px" }}>
-          {content}
+        <p key={i} style={{ fontWeight: "700", color: "#6d28d9", margin: "10px 0 3px", fontSize: "0.82rem", letterSpacing: "0.01em" }}>
+          {renderInline(trimmed.replace(/^###\s+/, ""))}
         </p>
       );
     }
-    // Bullet: starts with - or •
-    if (trimmed.startsWith("- ") || trimmed.startsWith("• ")) {
-      const content = trimmed.replace(/^[-•]\s/, "");
+    // ## Heading 2
+    if (/^##\s+/.test(trimmed)) {
       return (
-        <div key={i} style={{ display: "flex", gap: "8px", margin: "4px 0", paddingLeft: "4px" }}>
-          <span style={{ color: "#4a90e2", flexShrink: 0 }}>▸</span>
-          <span>{content}</span>
+        <p key={i} style={{ fontWeight: "700", color: "#4f46e5", margin: "12px 0 4px", fontSize: "0.86rem", letterSpacing: "0.01em" }}>
+          {renderInline(trimmed.replace(/^##\s+/, ""))}
+        </p>
+      );
+    }
+    // # Heading 1
+    if (/^#\s+/.test(trimmed)) {
+      return (
+        <p key={i} style={{ fontWeight: "800", color: "#3730a3", margin: "14px 0 5px", fontSize: "0.9rem" }}>
+          {renderInline(trimmed.replace(/^#\s+/, ""))}
+        </p>
+      );
+    }
+    // Bullet: - or * or •
+    if (/^[-*•]\s+/.test(trimmed)) {
+      return (
+        <div key={i} style={{ display: "flex", gap: "7px", margin: "3px 0", paddingLeft: "2px", alignItems: "flex-start" }}>
+          <span style={{ color: "#8b5cf6", flexShrink: 0, marginTop: "2px", fontSize: "0.75rem" }}>▸</span>
+          <span>{renderInline(trimmed.replace(/^[-*•]\s+/, ""))}</span>
         </div>
       );
     }
-    // Numbered: 1. text
-    if (/^\d+[\.\)]\s/.test(trimmed)) {
+    // Numbered list: 1. or 1)
+    if (/^\d+[.)]\s/.test(trimmed)) {
+      const num = trimmed.match(/^\d+/)?.[0];
       return (
-        <div key={i} style={{ display: "flex", gap: "8px", margin: "4px 0", paddingLeft: "4px" }}>
-          <span style={{ color: "#4a90e2", flexShrink: 0, fontWeight: "600" }}>
-            {trimmed.match(/^\d+/)?.[0]}.
+        <div key={i} style={{ display: "flex", gap: "7px", margin: "3px 0", paddingLeft: "2px", alignItems: "flex-start" }}>
+          <span style={{ color: "#8b5cf6", flexShrink: 0, fontWeight: "600", minWidth: "18px", fontSize: "0.82rem" }}>
+            {num}.
           </span>
-          <span>{trimmed.replace(/^\d+[\.\)]\s/, "")}</span>
+          <span>{renderInline(trimmed.replace(/^\d+[.)]\s/, ""))}</span>
         </div>
       );
     }
-    // Empty line
-    if (!trimmed) return <div key={i} style={{ height: "6px" }} />;
-    // Regular paragraph
+    // Blockquote: > text
+    if (/^>\s+/.test(trimmed)) {
+      return (
+        <div key={i} style={{
+          borderLeft: "3px solid #a78bfa", paddingLeft: "10px",
+          color: "#6d28d9", fontStyle: "italic", margin: "6px 0",
+          fontSize: "0.82rem"
+        }}>
+          {renderInline(trimmed.replace(/^>\s+/, ""))}
+        </div>
+      );
+    }
+    // Horizontal rule
+    if (/^---+$/.test(trimmed) || /^\*\*\*+$/.test(trimmed)) {
+      return <hr key={i} style={{ border: "none", borderTop: "1px solid #e2e8f0", margin: "8px 0" }} />;
+    }
+    // Empty line → small spacer
+    if (!trimmed) return <div key={i} style={{ height: "5px" }} />;
+    // Regular paragraph with inline formatting
     return (
-      <p key={i} style={{ margin: "4px 0", lineHeight: "1.6" }}>
-        {trimmed}
+      <p key={i} style={{ margin: "3px 0", lineHeight: "1.58" }}>
+        {renderInline(trimmed)}
       </p>
     );
   });
@@ -54,9 +108,28 @@ export default function AiAssistant() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  // Auto-scroll when response arrives
+  useEffect(() => {
+    if (response || loading) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [response, loading]);
+
+  // Auto-grow textarea
+  const handleInput = (e) => {
+    setQuery(e.target.value);
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = Math.min(el.scrollHeight, 120) + "px";
+    }
+  };
 
   const handleAsk = async () => {
-    if (!query.trim()) return;
+    if (!query.trim() || loading) return;
     setLoading(true);
     setResponse("");
 
@@ -71,10 +144,7 @@ export default function AiAssistant() {
               content:
                 "You are EmpowerHub AI — a career guidance assistant. Help students and job seekers with career paths, skills, resume tips, job roles, and learning resources. Be concise, encouraging, and practical. Use bullet points where helpful.",
             },
-            {
-              role: "user",
-              content: query,
-            },
+            { role: "user", content: query },
           ],
           temperature: 0.7,
           max_tokens: 800,
@@ -88,18 +158,13 @@ export default function AiAssistant() {
           },
         }
       );
-      const aiText = res.data.choices[0].message.content;
-      setResponse(aiText);
+      setResponse(res.data.choices[0].message.content);
     } catch (err) {
       console.error("API Error:", err?.response?.data || err.message);
       const status = err?.response?.status;
-      if (status === 401) {
-        setResponse("❌ Invalid API key. Please check your OpenRouter key in .env");
-      } else if (status === 429) {
-        setResponse("⏳ Rate limit reached. Please wait a moment and try again.");
-      } else {
-        setResponse("❌ Something went wrong. Check the console for details.");
-      }
+      if (status === 401) setResponse("❌ Invalid API key. Check your OpenRouter key in .env");
+      else if (status === 429) setResponse("⏳ Rate limit reached. Please wait a moment and try again.");
+      else setResponse("❌ Something went wrong. Check the console for details.");
     } finally {
       setLoading(false);
     }
@@ -107,14 +172,17 @@ export default function AiAssistant() {
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
       handleAsk();
     }
   };
 
-  const downloadTxtFile = (text) => {
+  const downloadTxtFile = () => {
     const timestamp = new Date().toLocaleString();
-    const header = `EmpowerHub AI Assistant Response\nGenerated at: ${timestamp}\n\n`;
-    const blob = new Blob([header + text], { type: "text/plain" });
+    const blob = new Blob(
+      [`EmpowerHub AI Response\nGenerated: ${timestamp}\n\n${response}`],
+      { type: "text/plain" }
+    );
     const link = document.createElement("a");
     link.download = "empowerhub-ai-response.txt";
     link.href = URL.createObjectURL(blob);
@@ -122,26 +190,70 @@ export default function AiAssistant() {
   };
 
   return (
-    <div className="chatbox">
-      <textarea
-        rows="3"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Ask me anything about jobs, skills, resumes... (Ctrl+Enter to send)"
-      />
-      <button onClick={handleAsk} disabled={loading}>
-        {loading ? "Thinking..." : "Ask AI"}
-      </button>
+    <>
+      {/* Messages area */}
+      <div className="panel-messages">
+        {/* Welcome bubble (always shown) */}
+        <div className="msg-bubble">
+          <div className="msg-avatar">AI</div>
+          <div className="msg-text">
+            👋 Hi! I'm <strong>EmpowerHub AI</strong>. Ask me anything about careers, skills, resumes, or job roles!
+          </div>
+        </div>
 
-      {response && (
-        <div className="response-wrapper">
-          <div className="response">{renderMarkdown(response)}</div>
-          <button className="download-button" onClick={() => downloadTxtFile(response)}>
-            ⬇ Download as .txt
+        {/* Typing indicator */}
+        {loading && (
+          <div className="msg-bubble">
+            <div className="msg-avatar">AI</div>
+            <div className="typing-indicator">
+              <div className="typing-dot" />
+              <div className="typing-dot" />
+              <div className="typing-dot" />
+            </div>
+          </div>
+        )}
+
+        {/* AI Response bubble */}
+        {response && !loading && (
+          <div className="msg-bubble">
+            <div className="msg-avatar">AI</div>
+            <div className="ai-response-bubble">{renderMarkdown(response)}</div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Download strip */}
+      {response && !loading && (
+        <div className="download-strip">
+          <button className="download-button" onClick={downloadTxtFile}>
+            ⬇ Save response
           </button>
         </div>
       )}
-    </div>
+
+      {/* Input area */}
+      <div className="panel-input-area">
+        <textarea
+          ref={textareaRef}
+          className="panel-textarea"
+          rows={1}
+          value={query}
+          onChange={handleInput}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask about careers, skills, resumes…"
+        />
+        <button
+          className="panel-send-btn"
+          onClick={handleAsk}
+          disabled={loading || !query.trim()}
+          aria-label="Send"
+        >
+          <IoSend />
+        </button>
+      </div>
+      <div className="panel-hint">Ctrl + Enter to send</div>
+    </>
   );
 }
